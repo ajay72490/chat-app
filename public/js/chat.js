@@ -6,11 +6,13 @@ const $messageFormInput = $messageForm.querySelector('input')
 const $messageFormButton = $messageForm.querySelector('button')
 const $sendLocation = document.querySelector('#send-location')
 const $messages = document.querySelector('#messages')
+const $image = document.querySelector('#send-image')
 
 //templates
 const messageTemplate = document.querySelector('#message-template').innerHTML
 const locationTemplate = document.querySelector('#location-message-template').innerHTML
 const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML
+const imageTemplate = document.querySelector('#image-template').innerHTML
 
 //options
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
@@ -26,14 +28,14 @@ const autoscroll = () => {
 
     //visible height 
     const visibleHeight = $messages.offsetHeight
-    
+
     //get messges continer height
     const containerHeight = $messages.scrollHeight
 
     //how far have i scrolled 
     const scrollOffset = $messages.scrollTop + visibleHeight
 
-    if(containerHeight - newMessageHeight <= scrollOffset) {
+    if (containerHeight - newMessageHeight <= scrollOffset) {
         $messages.scrollTop = $messages.scrollHeight
     }
 }
@@ -55,11 +57,11 @@ socket.on('message', (message) => {
 
 socket.on('locationMessage', (message) => {
 
-    const html = Mustache.render(locationTemplate, { 
+    const html = Mustache.render(locationTemplate, {
         username: message.username,
         url: message.url,
         createdAt: moment(message.createdAt).format('h:mm a')
-     })
+    })
 
     $messages.insertAdjacentHTML('beforeend', html)
     console.log(message)
@@ -68,14 +70,23 @@ socket.on('locationMessage', (message) => {
 })
 
 socket.on('roomData', ({ room, users }) => {
-    
+
     const html = Mustache.render(sidebarTemplate, {
         room,
         users
     })
 
     document.querySelector('#sidebar').innerHTML = html
-    
+
+})
+
+socket.on('mediaMessage', (message) => {
+    const html = Mustache.render(imageTemplate, {
+        dataUrl: message.imageData,
+        username: message.username,
+        createdAt: moment(message.createdAt).format('h:mm a')
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
 })
 
 $messageForm.addEventListener('submit', (e) => {
@@ -91,18 +102,18 @@ $messageForm.addEventListener('submit', (e) => {
         $messageFormInput.value = ''
         $messageFormInput.focus()
 
-        if(error) {
+        if (error) {
             return console.log(error)
         }
 
         console.log('The message was delivered.')
-        
+
     })
 })
 
 $sendLocation.addEventListener('click', () => {
-    
-    if(!navigator.geolocation) {
+
+    if (!navigator.geolocation) {
         return alert('Geolocation is not supported by your browser.')
     }
 
@@ -110,7 +121,7 @@ $sendLocation.addEventListener('click', () => {
 
     navigator.geolocation.getCurrentPosition((position) => {
         socket.emit('sendLocation', {
-            latitude: position.coords.latitude, 
+            latitude: position.coords.latitude,
             longitude: position.coords.longitude
         }, () => {
             $sendLocation.removeAttribute('disabled')
@@ -119,10 +130,42 @@ $sendLocation.addEventListener('click', () => {
     })
 })
 
+
+
+$image.addEventListener('change', handleFiles, false)
+
+function handleFiles() {
+    const fileList = this.files
+
+    if (fileList.length > 3) {
+        return alert("Please send max 3 images at a time")
+    }
+
+    for(var i = 0; i < fileList.length; i++) {
+        if (!fileList[i].type.match('image/*')) {
+            return alert('Please upload only images')
+        }
+    }
+
+    $image.setAttribute('disabled', 'disabled')
+
+    for (var i = 0; i < fileList.length; i++) {
+
+        const reader = new FileReader()
+        reader.onload = function (event) {
+                socket.emit('sendImage', {
+                    imageData: event.target.result
+                }, () => {
+                    $image.removeAttribute('disabled')
+                })
+        }
+        reader.readAsDataURL(fileList[i])
+    }
+}
+
 socket.emit('join', { username, room }, (error) => {
     if (error) {
         alert(error)
         location.href = '/'
     }
-    
 })

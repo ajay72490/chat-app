@@ -3,7 +3,7 @@ const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
 const Filter = require('bad-words')
-const { generateMessage, generateLocationMessage } = require('./utils/messages')
+const { generateMessage, generateLocationMessage, generateMediaMessage } = require('./utils/messages')
 const { addUser, removeUser, getUser, getUsersInRoom, getActiveRooms } = require("./utils/user")
 
 const app = express()
@@ -15,7 +15,7 @@ const publicDirectoryPath = path.join(__dirname, '../public')
 
 app.use(express.static(publicDirectoryPath))
 
-io.on('connection',(socket) => { 
+io.on('connection', (socket) => {
     console.log('New WebSocket connection');
 
         socket.on('join', ({ username, room }, callback) => {
@@ -61,6 +61,14 @@ io.on('connection',(socket) => {
             const user = getUser(socket.id)
 
             io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, `https://google.com/maps?q=${location.latitude},${location.longitude}`))
+            callback()
+        })
+
+        socket.on('sendImage', ({ imageData }, callback) => {
+
+            const user = getUser(socket.id)
+
+            io.to(user.room).emit('mediaMessage', generateMediaMessage(user.username, imageData))
             callback()
         })
 

@@ -112,7 +112,15 @@ button:disabled {
     overflow-y: scroll;
 }
 
+
 /* Message Styles */
+
+.image {
+    flex-grow: 1;
+    width: 300px;
+    height: 300px; 
+    margin-bottom: 16px;
+}
 
 .message {
     margin-bottom: 16px;   
