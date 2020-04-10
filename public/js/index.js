@@ -7,7 +7,10 @@ const $dropdown = document.querySelector('#dropdown')
 const dropdownTemplate = document.querySelector('#dropdown-template').innerHTML
 
     socket.emit('getActiveRooms', (activeRooms) => {
-        activeRooms.forEach((room) => {
+        if (!activeRooms.includes('default')) {
+            activeRooms = activeRooms.concat('default')
+        }
+        activeRooms.forEach((room) => {            
             const html = Mustache.render(dropdownTemplate, { room })
             $dropdown.insertAdjacentHTML('beforeend', html)
         })
