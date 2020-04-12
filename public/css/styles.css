@@ -37,9 +37,14 @@ input {
     outline: none;
 }
 
+.input__file {
+   display: none;
+}
+
 button {
     cursor: pointer;
     padding: 12px;
+    margin-right: 5px;
     background: #7C5CBF;
     border: none;
     color: white;
@@ -118,12 +123,12 @@ button:disabled {
 .image {
     border-radius: 5px;
     width: 300px;
-    height: 300px; 
+    height: 300px;
     margin-bottom: 8px;
 }
 
 .message {
-     min-width: 10%;
+     max-width: fit-content;
      background-color: rgba(177, 173, 173, 0.404);
      border-radius: 5px;
      padding: 10px;

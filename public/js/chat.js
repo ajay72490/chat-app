@@ -8,6 +8,9 @@ const $sendLocation = document.querySelector('#send-location')
 const $messages = document.querySelector('#messages')
 const $image = document.querySelector('#send-image')
 
+//action
+const $chooseFile = document.querySelector('#choose-file');
+
 //templates
 const messageTemplate = document.querySelector('#message-template').innerHTML
 const locationTemplate = document.querySelector('#location-message-template').innerHTML
@@ -131,8 +134,13 @@ $sendLocation.addEventListener('click', () => {
 })
 
 
+$image.addEventListener('click', () => {
+    
+    $chooseFile.click()
+    $chooseFile.addEventListener('change', handleFiles, false)
 
-$image.addEventListener('change', handleFiles, false)
+})
+
 
 function handleFiles() {
     const fileList = this.files
